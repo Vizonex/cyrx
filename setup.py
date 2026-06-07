@@ -71,7 +71,7 @@ class cyrx_build_ext(build_ext):
             ]
         else:
             possible_paths = [
-                os.path.join(install_dir, "Release", "librandomx.a"),
+                os.path.join(build_temp, "Release", "librandomx.a"),
                 os.path.join(install_dir, "Release", "librandomx.a"),
             ]
 
@@ -80,6 +80,7 @@ class cyrx_build_ext(build_ext):
             if os.path.exists(path):
                 lib_path = path
                 break
+            
 
         if not lib_path:
             raise RuntimeError(
