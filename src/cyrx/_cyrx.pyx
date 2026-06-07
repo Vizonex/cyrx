@@ -206,7 +206,7 @@ cdef class RXMiner:
         VM vm
         rx_seed* workers
         uint8_t n_threads
-        uint8_t flags
+        randomx_flags flags
 
         
     def __init__(
