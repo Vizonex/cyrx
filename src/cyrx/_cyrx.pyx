@@ -44,7 +44,7 @@ cdef class Cache:
         randomx_cache* cache
 
     def __init__(self, uint8_t flags = 0) -> None:
-        cdef randomx_cache* cache = randomx_alloc_cache(<randomx_flags>flags)
+        cdef randomx_cache* cache = randomx_alloc_cache(flags)
         if cache == NULL:
             raise MemoryError
         
@@ -75,7 +75,7 @@ cdef class Cache:
 cdef class Dataset:
     cdef randomx_dataset* dataset
     def __cinit__(self, uint8_t flags = 0) -> None:
-        cdef randomx_dataset* dataset = randomx_alloc_dataset(<randomx_flags>flags)
+        cdef randomx_dataset* dataset = randomx_alloc_dataset(flags)
         if dataset == NULL:
             raise MemoryError
     
@@ -121,7 +121,7 @@ cdef class VM:
             rx_dataset = (<Dataset>dataset).dataset
         
         with nogil:
-            vm = randomx_create_vm(<randomx_flags>flags, rx_cache, rx_dataset)
+            vm = randomx_create_vm(flags, rx_cache, rx_dataset)
         if vm == NULL:
             raise MemoryError
         self.vm = vm
