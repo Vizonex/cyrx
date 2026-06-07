@@ -121,7 +121,7 @@ cdef class VM:
             rx_dataset = (<Dataset>dataset).dataset
         
         with nogil:
-            vm = randomx_create_vm(flags, rx_cache, rx_dataset)
+            vm = randomx_create_vm(<randomx_flags>flags, rx_cache, rx_dataset)
         if vm == NULL:
             raise MemoryError
         self.vm = vm
