@@ -32,6 +32,10 @@ jobs:
       # PYCARES NOTE: Nb. keep cibuildwheel version pin consistent with job below
         run: pipx install cibuildwheel==3.2.1
       - id: set-matrix
+      # NOTE: windows-11-arm is broken and can't be compiled to randomx yet...
+        # && cibuildwheel --print-build-identifiers --platform windows --archs ARM64 \
+              # | jq -nRc '{"only": inputs, "os": "windows-11-arm"}'
+
         run: |
           MATRIX=$(
             {
@@ -42,9 +46,7 @@ jobs:
               && cibuildwheel --print-build-identifiers --platform macos --archs x86_64 \
               | jq -nRc '{"only": inputs, "os": "macos-15-intel"}' \
               && cibuildwheel --print-build-identifiers --platform windows --archs AMD64 \
-              | jq -nRc '{"only": inputs, "os": "windows-latest"}' \
-              && cibuildwheel --print-build-identifiers --platform windows --archs ARM64 \
-              | jq -nRc '{"only": inputs, "os": "windows-11-arm"}'
+              | jq -nRc '{"only": inputs, "os": "windows-latest"}'
             } | jq -sc
           )
           echo "include=$MATRIX" >> $GITHUB_OUTPUT
