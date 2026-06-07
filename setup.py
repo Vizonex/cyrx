@@ -5,8 +5,7 @@ import sys
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from pathlib import Path
-import glob
+
 
 use_system_lib = bool(int(os.environ.get("CYRX_USE_SYSTEM_LIB", 0)))
 
@@ -53,9 +52,15 @@ class cyrx_build_ext(build_ext):
         os.makedirs(build_temp, exist_ok=True)
         os.makedirs(install_dir, exist_ok=True)
 
+        cmake_args = [
+            '-DCMAKE_BUILD_TYPE=Release',
+            '-DCMAKE_CONFIGURATION_TYPES=Release',
+            f'-DCMAKE_INSTALL_PREFIX={install_dir}',
+        ]
+        
         print(f"Configuring randomx with CMake in {build_temp}")
         subprocess.check_call(
-            [cmake_cmd, os.path.abspath(randomx_dir)] + [], cwd=build_temp
+            [cmake_cmd, os.path.abspath(randomx_dir)] + cmake_args, cwd=build_temp
         )
 
         print("Building randomx...")
@@ -63,17 +68,21 @@ class cyrx_build_ext(build_ext):
 
         subprocess.check_call([cmake_cmd] + build_args, cwd=build_temp)
 
+        install_args = ['--install', '.', '--config', 'Release']
+        subprocess.check_call([cmake_cmd] + install_args, cwd=build_temp)
+
+
         if sys.platform == "win32":
             # Windows libraries
             possible_paths = [
-                os.path.join(build_temp, "Release", "randomx.lib"),
-                os.path.join(build_temp, "Release", "randomx_static.lib"),
-                os.path.join(build_temp, "Release", "librandomx.a"),  # MinGW
+                os.path.join(install_dir, "lib", "randomx.lib"),
+                os.path.join(install_dir, "lib", "randomx_static.lib"),
+                os.path.join(install_dir, "lib", "librandomx.a"),  # MinGW
             ]
         else:
             possible_paths = [
-                os.path.join(build_temp, "Release", "librandomx.a"),
-                os.path.join(install_dir, "Release", "librandomx.a"),
+                os.path.join(install_dir, "lib", "librandomx.a"),
+                os.path.join(install_dir, "lib64", "librandomx.a"),
             ]
 
         lib_path = None
@@ -81,11 +90,10 @@ class cyrx_build_ext(build_ext):
             if os.path.exists(path):
                 lib_path = path
                 break
-        else:
-            expected_files = ["librandomx.a", "randomx.a"]
-            missing_files = [path for path in expected_files if not glob.glob(f"{install_dir}**/{path}", recursive=True)] 
-            if missing_files:
-                lib_path = missing_files[0]
+        
+        
+        # print("==== DEBUG ====")
+        # print(lib_path)
 
         if not lib_path:
             raise RuntimeError(
