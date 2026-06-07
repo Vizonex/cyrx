@@ -1,4 +1,4 @@
-# cython: language_level = 3
+# cython: language_level = 3, language = c++
 from libc.stdint cimport uint8_t, uint64_t
 from ._randomx cimport *
 from cpython.bytes cimport PyBytes_FromString, PyBytes_FromStringAndSize
@@ -43,8 +43,8 @@ cdef class Cache:
     cdef:
         randomx_cache* cache
 
-    def __init__(self, uint8_t flags = 0) -> None:
-        cdef randomx_cache* cache = randomx_alloc_cache(flags)
+    def __init__(self, randomx_flags flags = 0) -> None:
+        cdef randomx_cache* cache = randomx_alloc_cache(<randomx_flags>flags)
         if cache == NULL:
             raise MemoryError
         
@@ -74,7 +74,7 @@ cdef class Cache:
 
 cdef class Dataset:
     cdef randomx_dataset* dataset
-    def __cinit__(self, uint8_t flags = 0) -> None:
+    def __cinit__(self, randomx_flags flags = 0) -> None:
         cdef randomx_dataset* dataset = randomx_alloc_dataset(flags)
         if dataset == NULL:
             raise MemoryError
@@ -101,7 +101,7 @@ cdef class VM:
 
     def __init__(
         self,
-        int flags = 0, 
+        randomx_flags flags = 0, 
         object cache = None,
         object dataset = None
     ):  
