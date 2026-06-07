@@ -27,7 +27,20 @@ if __name__ == "__main__":
 ```
 
 ```python
+from cyrx import RXMiner
 
+def main() -> None:
+    x = RXMiner(2) # 2 threads in this case...
+    out = x.run(
+        b"d2a4d89503447401ef6e6f30b46635b45b54f25a650c47464b5311f9d6fd4759",
+        b"d2a4d89503447401ef6e6f30b4663555",
+    )
+    assert (
+        hexlify(out)
+        == b"62894d19b5b129c9c7bab19171dc438446ceade7e0e8e3b1c263969e5463d9dc"
+    )
+if __name__ == "__main__":
+    main()
 ```
 
 
