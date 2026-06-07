@@ -8,6 +8,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:                            
+  id-token: write  
+  contents: write
+
 jobs:
   build_wheels:
     uses: ./.github/workflows/run-cibuildwheel.yml
