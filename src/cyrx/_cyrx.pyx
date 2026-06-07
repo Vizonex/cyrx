@@ -1,4 +1,4 @@
-# cython: language_level = 3, language = c++
+# cython: language_level = 3
 from libc.stdint cimport uint8_t, uint64_t
 from ._randomx cimport *
 from cpython.bytes cimport PyBytes_FromString, PyBytes_FromStringAndSize
