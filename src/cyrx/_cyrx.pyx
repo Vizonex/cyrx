@@ -30,7 +30,7 @@ cpdef enum:
     CYRX_FLAG_V2 = 128
 
 def get_flags():
-    return randomx_get_flags()
+    return <uint8_t>randomx_get_flags()
 
 def dataset_item_count():
     return randomx_dataset_item_count()
