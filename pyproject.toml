@@ -1,0 +1,38 @@
+[project]
+name = "cyrx"
+dynamic = ["version"]
+description = "A RandomX cython binding for python."
+readme = "README.md"
+authors = [
+    { name = "Vizonex", email = "VizonexBusiness@gmail.com" }
+]
+requires-python = ">=3.10"
+
+dependencies = [
+    'typing-extensions; python_version<"3.12"',
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "cython"
+]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "cyrx.__version__"}
+
+[project.optional-dependencies]
+tests = ["pytest"]
+
+[tool.cibuildwheel]
+build-frontend = "build"
+enable = ["cpython-freethreading"]
+
+
+
