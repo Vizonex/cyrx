@@ -9,25 +9,25 @@ from libc.string cimport memcpy
 cimport cython
 
 cpdef enum:
-    CYRX_FLAG_DEFAULT = RANDOMX_FLAG_DEFAULT
+    CYRX_FLAG_DEFAULT = 0
 cpdef enum:
-    CYRX_FLAG_LARGE_PAGES = RANDOMX_FLAG_LARGE_PAGES
+    CYRX_FLAG_LARGE_PAGES = 1
 cpdef enum:
-    CYRX_FLAG_HARD_AES = RANDOMX_FLAG_HARD_AES
+    CYRX_FLAG_HARD_AES = 2
 cpdef enum:
-    CYRX_FLAG_FULL_MEM = RANDOMX_FLAG_FULL_MEM
+    CYRX_FLAG_FULL_MEM = 4
 cpdef enum:
-    CYRX_FLAG_JIT = RANDOMX_FLAG_JIT
+    CYRX_FLAG_JIT = 8
 cpdef enum:
-    CYRX_FLAG_SECURE = RANDOMX_FLAG_SECURE
+    CYRX_FLAG_SECURE = 16
 cpdef enum:
-    CYRX_FLAG_ARGON2_SSSE3 = RANDOMX_FLAG_ARGON2_SSSE3
+    CYRX_FLAG_ARGON2_SSSE3 = 32
 cpdef enum:
-    CYRX_FLAG_ARGON2_AVX2 = RANDOMX_FLAG_ARGON2_AVX2
+    CYRX_FLAG_ARGON2_AVX2 = 64
 cpdef enum:
-    CYRX_FLAG_ARGON2 = RANDOMX_FLAG_ARGON2
+    CYRX_FLAG_ARGON2 = 96
 cpdef enum:
-    CYRX_FLAG_V2 = RANDOMX_FLAG_V2
+    CYRX_FLAG_V2 = 128
 
 def get_flags():
     return randomx_get_flags()
@@ -43,7 +43,7 @@ cdef class Cache:
     cdef:
         randomx_cache* cache
 
-    def __init__(self, randomx_flags flags = RANDOMX_FLAG_DEFAULT) -> None:
+    def __init__(self, uint8_t flags = RANDOMX_FLAG_DEFAULT) -> None:
         cdef randomx_cache* cache = randomx_alloc_cache(<randomx_flags>flags)
         if cache == NULL:
             raise MemoryError
@@ -101,7 +101,7 @@ cdef class VM:
 
     def __init__(
         self,
-        randomx_flags flags = RANDOMX_FLAG_DEFAULT, 
+        uint8_t flags = RANDOMX_FLAG_DEFAULT, 
         object cache = None,
         object dataset = None
     ):  
