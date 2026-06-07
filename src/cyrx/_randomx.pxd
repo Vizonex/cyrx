@@ -1,3 +1,4 @@
+from libc.stdint cimport uint8_t
 
 cdef extern from "randomx.h" nogil:
     struct randomx_vm:
@@ -22,16 +23,16 @@ cdef extern from "randomx.h" nogil:
     ctypedef randomx_cache randomx_cache
     ctypedef randomx_vm randomx_vm
     randomx_flags randomx_get_flags()
-    randomx_cache* randomx_alloc_cache(randomx_flags flags)
+    randomx_cache* randomx_alloc_cache(uint8_t flags)
     void randomx_init_cache(randomx_cache* cache, const void* key, size_t keySize)
     void* randomx_get_cache_memory(randomx_cache* cache)
     void randomx_release_cache(randomx_cache* cache)
-    randomx_dataset* randomx_alloc_dataset(randomx_flags flags)
+    randomx_dataset* randomx_alloc_dataset(uint8_t flags)
     unsigned long randomx_dataset_item_count()
     void randomx_init_dataset(randomx_dataset* dataset, randomx_cache* cache, unsigned long startItem, unsigned long itemCount)
     void* randomx_get_dataset_memory(randomx_dataset* dataset)
     void randomx_release_dataset(randomx_dataset* dataset)
-    randomx_vm* randomx_create_vm(randomx_flags flags, randomx_cache* cache, randomx_dataset* dataset)
+    randomx_vm* randomx_create_vm(uint8_t flags, randomx_cache* cache, randomx_dataset* dataset)
     void randomx_vm_set_cache(randomx_vm* machine, randomx_cache* cache)
     void randomx_vm_set_dataset(randomx_vm* machine, randomx_dataset* dataset)
     void randomx_destroy_vm(randomx_vm* machine)
