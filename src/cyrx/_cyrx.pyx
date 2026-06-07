@@ -247,7 +247,7 @@ cdef class RXMiner:
             self.flags |= <uint8_t>RANDOMX_FLAG_ARGON2
         
         if v2:
-            self.flags |= RANDOMX_FLAG_V2
+            self.flags |= <uint8_t>RANDOMX_FLAG_V2
 
         
         self.seed = None
