@@ -2,12 +2,24 @@ import os
 import shutil
 import subprocess
 import sys
+import platform
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
 
 use_system_lib = bool(int(os.environ.get("CYRX_USE_SYSTEM_LIB", 0)))
+
+def is_windows_11_arm() -> bool:
+    """Checks if we are using windows-11-arm"""
+
+    is_arm = platform.machine() == "ARM64"
+    
+    version = platform.version()
+    build = version.split('.')[2] if len(version.split('.')) > 2 else "0"
+    is_win11_build = platform.release() == "10" and int(build) >= 22000
+    
+    return is_arm and is_win11_build
 
 
 class cyrx_build_ext(build_ext):
@@ -57,6 +69,9 @@ class cyrx_build_ext(build_ext):
             '-DCMAKE_CONFIGURATION_TYPES=Release',
             f'-DCMAKE_INSTALL_PREFIX={install_dir}',
         ]
+
+        if is_windows_11_arm():
+            cmake_args.append("-DARM64")
         
         print(f"Configuring randomx with CMake in {build_temp}")
         subprocess.check_call(
