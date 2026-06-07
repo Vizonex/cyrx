@@ -13,3 +13,4 @@ wheels/
 *.c
 *.so
 *.pyd
+*.html

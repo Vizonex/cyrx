@@ -74,8 +74,8 @@ cdef class Cache:
 
 cdef class Dataset:
     cdef randomx_dataset* dataset
-    def __cinit__(self, randomx_flags flags = RANDOMX_FLAG_DEFAULT) -> None:
-        cdef randomx_dataset* dataset = randomx_alloc_dataset(flags)
+    def __cinit__(self, uint8_t flags = RANDOMX_FLAG_DEFAULT) -> None:
+        cdef randomx_dataset* dataset = randomx_alloc_dataset(<randomx_flags>flags)
         if dataset == NULL:
             raise MemoryError
     
