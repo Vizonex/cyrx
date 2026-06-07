@@ -206,7 +206,7 @@ cdef class RXMiner:
         VM vm
         rx_seed* workers
         uint8_t n_threads
-        randomx_flags flags
+        uint8_t flags
 
         
     def __init__(
@@ -251,9 +251,9 @@ cdef class RXMiner:
 
         
         self.seed = None
-        self.dataset = Dataset(self.flags)
-        self.cache = Cache(self.flags)
-        self.vm = VM(self.flags, self.cache, self.dataset)
+        self.dataset = Dataset(<randomx_flags>self.flags)
+        self.cache = Cache(<randomx_flags>self.flags)
+        self.vm = VM(<randomx_flags>self.flags, self.cache, self.dataset)
         if self._init_threads(threads) < 0:
             raise MemoryError
 
