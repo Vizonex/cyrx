@@ -50,6 +50,6 @@ if __name__ == "__main__":
 > it has been put on pypi in order to shortcut some problems that the pyrx 
 > library has failed to live up to.
 > The Author of this library is not responsible for any abuse
-> with this library including Crytojacking which is common amongst malware 
+> with this library including Cryptojacking which is common amongst malware 
 > authors & large botnets. Use at your own risk.
 
