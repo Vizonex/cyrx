@@ -5,7 +5,8 @@ import sys
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-
+from pathlib import Path
+import glob
 
 use_system_lib = bool(int(os.environ.get("CYRX_USE_SYSTEM_LIB", 0)))
 
@@ -80,7 +81,11 @@ class cyrx_build_ext(build_ext):
             if os.path.exists(path):
                 lib_path = path
                 break
-            
+        else:
+            expected_files = ["librandomx.a", "randomx.a"]
+            missing_files = [path for path in expected_files if not glob.glob(f"{install_dir}**/{path}", recursive=True)] 
+            if missing_files:
+                lib_path = missing_files[0]
 
         if not lib_path:
             raise RuntimeError(
