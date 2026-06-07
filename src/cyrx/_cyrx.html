@@ -2729,9 +2729,9 @@ static int __pyx_pf_4cyrx_5_cyrx_7RXMiner___init__(struct __pyx_obj_4cyrx_5_cyrx
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_v_self-&gt;seed);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_v_self-&gt;seed);
   __pyx_v_self-&gt;seed = Py_None;
-</pre><pre class="cython line score-7" onclick="(function(f,s,c){c=f.nodeValue=='+';s.display=c?'block':'none';f.nodeValue=c?'−':'+'})(this.firstChild,this.nextElementSibling.style)">+<span class="">254</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="o">&lt;</span><span class="n">randomx_flags</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span></pre>
-<pre class='cython code score-7 '>  __pyx_t_3 = NULL;
-  __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyLong_From_enum__randomx_flags</span>(((randomx_flags)__pyx_v_self-&gt;flags));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 254, __pyx_L1_error)</span>
+</pre><pre class="cython line score-5" onclick="(function(f,s,c){c=f.nodeValue=='+';s.display=c?'block':'none';f.nodeValue=c?'−':'+'})(this.firstChild,this.nextElementSibling.style)">+<span class="">254</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span></pre>
+<pre class='cython code score-5 '>  __pyx_t_3 = NULL;
+  __pyx_t_4 = __Pyx_PyLong_From_uint8_t(__pyx_v_self-&gt;flags);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 254, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
   __pyx_t_5 = 1;
   {
@@ -2747,9 +2747,9 @@ static int __pyx_pf_4cyrx_5_cyrx_7RXMiner___init__(struct __pyx_obj_4cyrx_5_cyrx
   <span class='pyx_macro_api'>__Pyx_DECREF</span>((PyObject *)__pyx_v_self-&gt;dataset);
   __pyx_v_self-&gt;dataset = ((struct __pyx_obj_4cyrx_5_cyrx_Dataset *)__pyx_t_2);
   __pyx_t_2 = 0;
-</pre><pre class="cython line score-7" onclick="(function(f,s,c){c=f.nodeValue=='+';s.display=c?'block':'none';f.nodeValue=c?'−':'+'})(this.firstChild,this.nextElementSibling.style)">+<span class="">255</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">Cache</span><span class="p">(</span><span class="o">&lt;</span><span class="n">randomx_flags</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span></pre>
-<pre class='cython code score-7 '>  __pyx_t_4 = NULL;
-  __pyx_t_3 = <span class='pyx_c_api'>__Pyx_PyLong_From_enum__randomx_flags</span>(((randomx_flags)__pyx_v_self-&gt;flags));<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 255, __pyx_L1_error)</span>
+</pre><pre class="cython line score-5" onclick="(function(f,s,c){c=f.nodeValue=='+';s.display=c?'block':'none';f.nodeValue=c?'−':'+'})(this.firstChild,this.nextElementSibling.style)">+<span class="">255</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">Cache</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">)</span></pre>
+<pre class='cython code score-5 '>  __pyx_t_4 = NULL;
+  __pyx_t_3 = __Pyx_PyLong_From_uint8_t(__pyx_v_self-&gt;flags);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 255, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
   __pyx_t_5 = 1;
   {
@@ -2765,9 +2765,9 @@ static int __pyx_pf_4cyrx_5_cyrx_7RXMiner___init__(struct __pyx_obj_4cyrx_5_cyrx
   <span class='pyx_macro_api'>__Pyx_DECREF</span>((PyObject *)__pyx_v_self-&gt;cache);
   __pyx_v_self-&gt;cache = ((struct __pyx_obj_4cyrx_5_cyrx_Cache *)__pyx_t_2);
   __pyx_t_2 = 0;
-</pre><pre class="cython line score-7" onclick="(function(f,s,c){c=f.nodeValue=='+';s.display=c?'block':'none';f.nodeValue=c?'−':'+'})(this.firstChild,this.nextElementSibling.style)">+<span class="">256</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">vm</span> <span class="o">=</span> <span class="n">VM</span><span class="p">(</span><span class="o">&lt;</span><span class="n">randomx_flags</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span></pre>
-<pre class='cython code score-7 '>  __pyx_t_3 = NULL;
-  __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyLong_From_enum__randomx_flags</span>(((randomx_flags)__pyx_v_self-&gt;flags));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 256, __pyx_L1_error)</span>
+</pre><pre class="cython line score-5" onclick="(function(f,s,c){c=f.nodeValue=='+';s.display=c?'block':'none';f.nodeValue=c?'−':'+'})(this.firstChild,this.nextElementSibling.style)">+<span class="">256</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">vm</span> <span class="o">=</span> <span class="n">VM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span></pre>
+<pre class='cython code score-5 '>  __pyx_t_3 = NULL;
+  __pyx_t_4 = __Pyx_PyLong_From_uint8_t(__pyx_v_self-&gt;flags);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 256, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
   __pyx_t_5 = 1;
   {
