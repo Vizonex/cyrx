@@ -229,22 +229,22 @@ cdef class RXMiner:
         self.flags = RANDOMX_FLAG_DEFAULT
 
         if large_pages:
-            self.flags |= RANDOMX_FLAG_LARGE_PAGES
+            self.flags |= <uint8_t>RANDOMX_FLAG_LARGE_PAGES
         
         if jit:
-            self.flags |= RANDOMX_FLAG_JIT
+            self.flags |= <uint8_t>RANDOMX_FLAG_JIT
         
         if secure:
-            self.flags |= RANDOMX_FLAG_SECURE
+            self.flags |= <uint8_t>RANDOMX_FLAG_SECURE
         
         if ssse3:
-            self.flags |= RANDOMX_FLAG_ARGON2_SSSE3
+            self.flags |= <uint8_t>RANDOMX_FLAG_ARGON2_SSSE3
         
         if avx2:
-            self.flags |= RANDOMX_FLAG_ARGON2_AVX2
+            self.flags |= <uint8_t>RANDOMX_FLAG_ARGON2_AVX2
         
         if argon2:
-            self.flags |= RANDOMX_FLAG_ARGON2
+            self.flags |= <uint8_t>RANDOMX_FLAG_ARGON2
         
         if v2:
             self.flags |= RANDOMX_FLAG_V2
