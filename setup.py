@@ -71,8 +71,8 @@ class cyrx_build_ext(build_ext):
             ]
         else:
             possible_paths = [
-                os.path.join(install_dir, "lib", "librandomx.a"),
-                os.path.join(install_dir, "lib64", "librandomx.a"),
+                os.path.join(install_dir, "Release", "librandomx.a"),
+                os.path.join(install_dir, "Release", "librandomx.a"),
             ]
 
         lib_path = None
