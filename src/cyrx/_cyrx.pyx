@@ -1,12 +1,12 @@
-# cython: language_level = 3
+# cython: freethreading_compatible = True
 # distutils: language = c++
 from libc.stdint cimport uint8_t, uint64_t
 from ._randomx cimport *
 from cpython.bytes cimport PyBytes_FromString, PyBytes_FromStringAndSize
 from cpython.buffer cimport PyObject_GetBuffer, PyBUF_SIMPLE, PyBuffer_Release
 from cpython.mem cimport PyMem_Malloc, PyMem_Free, PyMem_Realloc
+from cpython.exc cimport PyErr_SetString
 from cython cimport parallel
-from libc.string cimport memcpy
 cimport cython
 
 cpdef enum:
@@ -30,14 +30,45 @@ cpdef enum:
 cpdef enum:
     CYRX_FLAG_V2 = 128
 
+
+# NOTE: All recastings to randomx_flags must not be exposed to python
+# This is due to the way the compilers on unix systems work
+# so extra care MUST be taken to ensure no exposals happen
+# recasts are used to help workaround these problems...
+
 def get_flags():
+    """
+    Obtains recommended flags based on the current machine in use.
+    These options however do not include:
+        - CYRX_FLAG_LARGE_PAGES
+        - CYRX_FLAG_FULL_MEM
+        - CYRX_FLAG_SECURE
+
+    :returns: recommended flags
+    """
     return <uint8_t>randomx_get_flags()
 
 def dataset_item_count():
+    """
+    Gets the number of items contained in a given dataset.
+    Know however that the size may vary depending on system's 
+    current arch.
+    """
     return randomx_dataset_item_count()
 
+# mostly a lazy shortcut for reaching PyObject_GetBuffer with PyBUF_SIMPLE
+# added in for us.
 cdef int get_buffer(object obj, Py_buffer* view):
     return PyObject_GetBuffer(obj, view, PyBUF_SIMPLE)
+
+
+# NOTE: Throw an issue if you think this error is too vauge and 
+# we can adjust the naming or allow custom parameter names to be utilized.
+cdef int extract_input(object buf, Py_buffer* view):
+    if not buf:
+        PyErr_SetString(ValueError, "input buffer can't be empty or None")
+        return -1
+    return PyObject_GetBuffer(buf, view, PyBUF_SIMPLE)
 
 
 cdef class Cache:
@@ -51,13 +82,21 @@ cdef class Cache:
         
         self.cache = cache
     
-    def init(self, object key):
+    cpdef object init(self, object key):
+        """
+        Initializes the cache memory using a provided key.
+        
+        :param key: the key to initializes
+
+        :raises ValueError: if key is empty, it really shouldn't be.
+        :raises TypeError: if object doesn't support the buffer protocol.
+        :raises BufferError: raised if buffer doesn't support the 
+            existing flag.
+        """
+
         cdef Py_buffer view
 
-        if len(key) <= 0:
-            raise ValueError("key cannot be empty")
-        
-        if get_buffer(key, &view) < 0:
+        if extract_input(key, &view) < 0:
             raise
         
         with nogil:
@@ -66,6 +105,9 @@ cdef class Cache:
         PyBuffer_Release(&view)
 
     def get_memory(self):
+        """
+        Obtains a pointer to the interal memory buffer of the cache structure.
+        """
         return PyBytes_FromString(<char*>randomx_get_cache_memory(self.cache))
 
     def __dealloc__(self):
@@ -75,21 +117,37 @@ cdef class Cache:
 
 cdef class Dataset:
     cdef randomx_dataset* dataset
-    def __cinit__(self, uint8_t flags = RANDOMX_FLAG_DEFAULT) -> None:
+
+    def __init__(self, uint8_t flags = RANDOMX_FLAG_DEFAULT) -> None:
         cdef randomx_dataset* dataset = randomx_alloc_dataset(<randomx_flags>flags)
         if dataset == NULL:
             raise MemoryError
     
-    def init(self, Cache cache, unsigned long start_item, unsigned long item_count):
+    
+    cpdef object init(self, Cache cache, unsigned long start = 0, unsigned long end = randomx_dataset_item_count() - 1):
+        """
+        Initializes dataset items.
+
+        This may be done by several calls in overlapping threads as needed.
+        
+        :param cache: the cache to a previously allocated dataset structure.
+        :param start: the start position to initalize off of defaults to 0
+        :param end: the ending position to initialize off of defaults to `randomx_dataset_item_count()`
+        
+        :raises ValueError: raised when randomx's rules about the start and ending position aren't met.
+        """
         cdef unsigned long dataset_item_count = randomx_dataset_item_count()
-        if not ((start_item < dataset_item_count) and (item_count <= dataset_item_count)):
-            raise ValueError("start_item should be less than the dataset item count same with the item_count")
+        if not ((start < dataset_item_count) and (end <= dataset_item_count)):
+            raise ValueError("start should be less than the dataset item count and end should not exceed the dataset item count.")
 
         with nogil:
-            randomx_init_dataset(self.dataset, cache.cache, start_item, item_count)
+            randomx_init_dataset(self.dataset, cache.cache, start, end)
 
 
     def get_memory(self):
+        """
+        Obtains the internal memory of the underlying randomx dataset structure.
+        """
         return PyBytes_FromString(<char*>randomx_get_dataset_memory(self.dataset))
 
     def __dealloc__(self):
@@ -99,6 +157,7 @@ cdef class Dataset:
 
 cdef class VM:
     cdef randomx_vm* vm
+    cdef uint8_t flags
 
     def __init__(
         self,
@@ -126,25 +185,37 @@ cdef class VM:
         if vm == NULL:
             raise MemoryError
         self.vm = vm
+        self.flags = flags
 
     def __dealloc__(self):
         if self.vm != NULL:
             randomx_destroy_vm(self.vm)
 
-    def set_cache(self, Cache cache):
-        randomx_vm_set_cache(self.vm, cache.cache)
+    cpdef object set_cache(self, Cache cache):
+        """
+        Reinitializes a virtual machine with a new Cache.
+        This function should get called anytime the cache is 
+        reinitialized with a new key.
+
+        :param cache: the new cache to set.
+        """
+        with nogil:
+            randomx_vm_set_cache(self.vm, cache.cache)
+
+    cpdef object set_dataset(self, Dataset dataset):
+        """
+        Reinitializes a virtual machine with a new Dataset.
+
+        :param dataset: the new dataset to set. 
+        """
+        with nogil:
+            randomx_vm_set_dataset(self.vm, dataset.dataset)
     
-    def set_dataset(self, Dataset dataset):
-        randomx_vm_set_dataset(self.vm, dataset.dataset)
-    
-    def hash(self, object input):
+    cpdef bytes hash(self, object input):
         cdef Py_buffer view
         cdef char out[32]
 
-        if not input:
-            raise ValueError("input cannot be empty")
-        
-        if get_buffer(input, &view) < 0:
+        if extract_input(input, &view) < 0:
             raise
         
         with nogil:
@@ -156,10 +227,7 @@ cdef class VM:
     def hash_first(self, object input):
         cdef Py_buffer view
 
-        if not input:
-            raise ValueError("input cannot be empty")
-        
-        if get_buffer(input, &view) < 0:
+        if extract_input(input, &view) < 0:
             raise
         
         with nogil:
@@ -171,12 +239,9 @@ cdef class VM:
         cdef Py_buffer view
         cdef char out[32]
 
-        if not input:
-            raise ValueError("input cannot be empty")
-        
-        if get_buffer(input, &view) < 0:
+        if extract_input(input, &view) < 0:
             raise
-        
+
         with nogil:
             randomx_calculate_hash_next(self.vm, view.buf, <size_t>view.len, out)
     
@@ -189,19 +254,21 @@ cdef class VM:
             randomx_calculate_hash_last(self.vm, out)
         return PyBytes_FromStringAndSize(out, 32)
 
-    # TODO:
-    # def calculate_commitment(self, object input, object  ):
 
 
-# Based off https://github.com/EpicCash/randomx-rust/blob/master/src/types.rs
+# Inspired off https://github.com/EpicCash/randomx-rust/blob/master/src/types.rs
 
 cdef struct rx_seed:
     uint64_t start
     uint64_t end
 
 cdef class RXMiner:
+    """
+    Used for being a rather optimized version of a crypto mining
+    class with minimal required things to setup.
+    """
     cdef:
-        object seed
+        object _seed
         Cache cache
         Dataset dataset
         VM vm
@@ -221,7 +288,6 @@ cdef class RXMiner:
         bint argon2 = False,
         bint v2 = False
     ):
-        cdef Py_buffer view
 
         if threads == 0:
             threads = 1
@@ -251,7 +317,7 @@ cdef class RXMiner:
             self.flags |= <uint8_t>RANDOMX_FLAG_V2
 
         
-        self.seed = None
+        self._seed = None
         self.dataset = Dataset(self.flags)
         self.cache = Cache(self.flags)
         self.vm = VM(self.flags, self.cache, self.dataset)
@@ -259,14 +325,42 @@ cdef class RXMiner:
             raise MemoryError
 
     cdef int init_seed(self, object seed):
-        if len(seed) != 32:
-            raise ValueError("seeds should be exactly 32 bits")
+        # NOTE: Memoryview is the safest thing to use 
+        # as it is carrying a Py_buffer that it 
+        # will remeber to release when complete. 
+        # it is used here mostly as a safety measure 
+        # to ensure the seed is compatable. with any 
+        # buffer object examples: bytearray, bytes, array.array.
         cdef memoryview _seed = memoryview(seed)
-        if _seed != self.seed:
-            self.seed = _seed
-            self.cache.init(_seed)
-            return False
+        if _seed == self._seed:
+            # No extra actions nessesary.
+            return True
+        
+        self.cache.init(seed)
+
+        # update vm like the randomx documentation 
+        # suggests doing after updating the key.
+        # will use the C function directly since were not 
+        # working with python buffers directly in this section.
+
+        with nogil:
+            randomx_vm_set_cache(self.vm.vm, self.cache.cache)
+
+        self._seed = seed
         return True
+    
+    @property
+    def seed(self): # -> memoryview | None
+        """the current seed in use. 
+        To change the current seed in use, 
+        use the :function:`.run` function."""
+        return self._seed
+
+ 
+    @property
+    def threads(self): # -> int
+        """the current number of threads in use."""
+        return self.n_threads
 
     @cython.cdivision(True)
     cdef int _init_threads(self, uint8_t threads):
@@ -304,12 +398,27 @@ cdef class RXMiner:
         if self.workers != NULL:
             PyMem_Free(self.workers)
  
-    def run(self, object data, object seed):
+    def run(self, object data, object seed): # -> bytes
+        """
+        Runs a single cycle normally known as a `slow_hash`
+        function in other code implementations. A simpler name
+        was chosen to be a little bit cleaner and less confusing
+        (especially for newcommers).
+
+        :param data: the data buffer being inputted.
+        :param seed: the current seed
+            if different, the current seed will be updated
+            and the dataset will be initalized from multiple
+            threads if multiple were provided otherwise it runs
+            off of a single thread.
+
+        :returns: a computed hash from the randomx virtual machine.
+        """
         cdef randomx_cache* cache = self.cache.cache
         cdef randomx_dataset* dataset = self.dataset.dataset
         cdef rx_seed* workers = self.workers
-        cdef uint8_t t
         cdef memoryview _data = memoryview(data)
+        cdef uint8_t t
 
         if not self.init_seed(seed):
             if self.n_threads == 1:
@@ -320,15 +429,4 @@ cdef class RXMiner:
                         randomx_init_dataset(dataset, cache, workers[t].start, workers[t].end)
 
         return self.vm.hash(_data)
-
-
-       
-
-
-        
-        
-
-
-
-
 
