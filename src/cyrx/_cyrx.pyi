@@ -28,10 +28,10 @@ def get_flags() -> int:
     """
     ...
 
-def dataset_item_count() -> int: 
+def dataset_item_count() -> int:
     """
     Gets the number of items contained in a given dataset.
-    Know however that the size may vary depending on system's 
+    Know however that the size may vary depending on system's
     current arch.
     """
     ...
@@ -41,12 +41,12 @@ class Cache:
     def init(self, key: Buffer) -> None:
         """
         Initializes the cache memory using a provided key.
-        
+
         :param key: the key to initializes
 
         :raises ValueError: if key is empty, it really shouldn't be.
         :raises TypeError: if object doesn't support the buffer protocol.
-        :raises BufferError: raised if buffer doesn't support the 
+        :raises BufferError: raised if buffer doesn't support the
             existing flag.
         """
     def get_memory(self) -> bytes:
@@ -61,15 +61,17 @@ class Dataset:
         Initializes dataset items.
 
         This may be done by several calls in overlapping threads as needed.
-        
+
         :param cache: the cache to a previously allocated dataset structure.
         :param start: the start position to initalize off of defaults to 0
-        :param end: the ending position to initialize off of defaults to `randomx_dataset_item_count()`
-        
-        :raises ValueError: raised when randomx's rules about the start and ending position aren't met.
+        :param end: the ending position to initialize off of defaults to
+            `randomx_dataset_item_count()`
+
+        :raises ValueError: raised when randomx's rules about the start and ending
+            position aren't met.
         """
         ...
-    def get_memory(self) -> bytes: 
+    def get_memory(self) -> bytes:
         """
         Obtains the internal memory of the underlying randomx dataset structure.
         """
@@ -79,20 +81,20 @@ class VM:
     def __init__(
         self, flags: int = 0, cache: Cache | None = None, dataset: Dataset | None = None
     ) -> None: ...
-    def set_cache(self, cache: Cache) -> None: 
+    def set_cache(self, cache: Cache) -> None:
         """
         Reinitializes a virtual machine with a new Cache.
-        This function should get called anytime the cache is 
+        This function should get called anytime the cache is
         reinitialized with a new key.
 
         :param cache: the new cache to set.
         """
         ...
-    def set_dataset(self, dataset: Dataset) -> None: 
+    def set_dataset(self, dataset: Dataset) -> None:
         """
         Reinitializes a virtual machine with a new Dataset.
 
-        :param dataset: the new dataset to set. 
+        :param dataset: the new dataset to set.
         """
         ...
     def hash(self, input: object) -> bytes: ...
@@ -116,7 +118,7 @@ class RXMiner:
         argon2: bool = ...,
         v2: bool = ...,
     ) -> None: ...
-    def run(self, data: Buffer, seed: Buffer) -> bytes: 
+    def run(self, data: Buffer, seed: Buffer) -> bytes:
         """
         Runs a single cycle normally known as a `slow_hash`
         function in other code implementations. A simpler name
@@ -133,3 +135,24 @@ class RXMiner:
         :returns: a computed hash from the randomx virtual machine.
         """
         ...
+
+class SeedHeights:
+    current: int
+    next: int
+
+class SeedHeight:
+    def __init__(self, lag: int = ..., blocks: int = ...): ...
+    @property
+    def lag(self) -> int:
+        """obtains currently set epoch lag"""
+
+    @lag.setter
+    def lag(self, value: int) -> None: ...
+    @property
+    def blocks(self) -> int:
+        """obtains the current number of blocks to use"""
+
+    @blocks.setter
+    def blocks(self, value: int) -> None: ...
+    def get_current(self, height: int) -> int: ...
+    def get_pair(self, height: int) -> SeedHeights: ...

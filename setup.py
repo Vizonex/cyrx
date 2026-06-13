@@ -1,30 +1,32 @@
 import os
+import platform
 import shutil
 import subprocess
 import sys
-import platform
+from typing import ClassVar
 
-from setuptools import setup, Extension
+from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
-
 use_system_lib = bool(int(os.environ.get("CYRX_USE_SYSTEM_LIB", 0)))
+
 
 def is_windows_11_arm() -> bool:
     """Checks if we are using windows-11-arm"""
 
     is_arm = platform.machine() == "ARM64"
-    
+
     version = platform.version()
-    build = version.split('.')[2] if len(version.split('.')) > 2 else "0"
+    build = version.split(".")[2] if len(version.split(".")) > 2 else "0"
     is_win11_build = platform.release() == "10" and int(build) >= 22000
-    
+
     return is_arm and is_win11_build
 
 
 class cyrx_build_ext(build_ext):
     # Brought over from winloop since these can be very useful.
-    user_options = build_ext.user_options + [
+    user_options: ClassVar[list[tuple[str, str | None, str]]] = [
+        *build_ext.user_options,
         ("cython-always", None, "run cythonize() even if .c files are present"),
         (
             "cython-annotate",
@@ -65,27 +67,26 @@ class cyrx_build_ext(build_ext):
         os.makedirs(install_dir, exist_ok=True)
 
         cmake_args = [
-            '-DCMAKE_BUILD_TYPE=Release',
-            '-DCMAKE_CONFIGURATION_TYPES=Release',
-            f'-DCMAKE_INSTALL_PREFIX={install_dir}',
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_CONFIGURATION_TYPES=Release",
+            f"-DCMAKE_INSTALL_PREFIX={install_dir}",
         ]
 
         if is_windows_11_arm():
             cmake_args.append("-DARM64")
-        
+
         print(f"Configuring randomx with CMake in {build_temp}")
         subprocess.check_call(
-            [cmake_cmd, os.path.abspath(randomx_dir)] + cmake_args, cwd=build_temp
+            [cmake_cmd, os.path.abspath(randomx_dir), *cmake_args], cwd=build_temp
         )
 
         print("Building randomx...")
         build_args = ["--build", ".", "--config", "Release"]
 
-        subprocess.check_call([cmake_cmd] + build_args, cwd=build_temp)
+        subprocess.check_call([cmake_cmd, *build_args], cwd=build_temp)
 
-        install_args = ['--install', '.', '--config', 'Release']
-        subprocess.check_call([cmake_cmd] + install_args, cwd=build_temp)
-
+        install_args = ["--install", ".", "--config", "Release"]
+        subprocess.check_call([cmake_cmd, *install_args], cwd=build_temp)
 
         if sys.platform == "win32":
             # Windows libraries
@@ -105,8 +106,7 @@ class cyrx_build_ext(build_ext):
             if os.path.exists(path):
                 lib_path = path
                 break
-        
-        
+
         # print("==== DEBUG ====")
         # print(lib_path)
 
@@ -133,7 +133,7 @@ class cyrx_build_ext(build_ext):
         for extension in self.distribution.ext_modules:
             for i, sfile in enumerate(extension.sources):
                 if sfile.endswith(".pyx"):
-                    prefix, ext = os.path.splitext(sfile)
+                    prefix, _ = os.path.splitext(sfile)
                     cfile = prefix + ".c"
 
                     if os.path.exists(cfile) and not self.cython_always:
