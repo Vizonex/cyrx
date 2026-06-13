@@ -430,3 +430,107 @@ cdef class RXMiner:
 
         return self.vm.hash(_data)
 
+
+# Seems to be of importance to tools like 
+# https://github.com/monero-project/monero/blob/master/src/crypto/rx-slow-hash.c#L141
+# I wrote my own version since it's seems to be very simplistic math 
+# but feel free to throw an issue if licensing is a concern.
+
+DEF SEEDHASH_EPOCH_BLOCKS = 2048
+DEF SEEDHASH_EPOCH_LAG = 64
+
+
+cdef extern from *:
+    """
+
+// Copyright (c) 2019-2024, The Monero Project
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification, are
+// permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this list of
+//    conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice, this list
+//    of conditions and the following disclaimer in the documentation and/or other
+//    materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its contributors may be
+//    used to endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+// THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+uint64_t rx_seedhight(const uint64_t height,const uint64_t blocks,const uint64_t lag) {
+    return (height <= blocks+lag) ? 0 :
+                       (height - lag - 1) & ~(blocks-1);
+}
+static inline int is_power_of_2(uint64_t n) { return n && (n & (n-1)) == 0; }
+    """
+    uint64_t rx_seedhight(const uint64_t height,const uint64_t blocks,const uint64_t lag) noexcept nogil
+    bint is_power_of_2(uint64_t n) nogil
+
+@cython.dataclasses.dataclass
+cdef class SeedHeights:
+    cdef:
+        readonly uint64_t current
+        readonly uint64_t next
+    
+    
+ 
+cdef class SeedHeight:
+    """Helps with calculation of different seed hights related things"""
+    cdef:
+        uint64_t _lag
+        uint64_t _blocks
+    
+    def __init__(self, uint64_t lag = SEEDHASH_EPOCH_LAG, uint64_t blocks = SEEDHASH_EPOCH_BLOCKS) -> None:
+        self._lag = lag
+        self._blocks = blocks
+
+    @property
+    def lag(self):
+        """obtains currently set epoch lag"""
+        return self._lag
+    
+    @lag.setter
+    def lag(self, uint64_t value):
+        if value > SEEDHASH_EPOCH_LAG or (not is_power_of_2(value)):
+            self._lag = SEEDHASH_EPOCH_LAG
+        elif value:
+            self._lag = value
+        else:
+            self._lag = SEEDHASH_EPOCH_LAG
+
+    @property
+    def blocks(self):
+        """obtains the current number of blocks to use"""
+        return self._blocks
+    
+    @blocks.setter
+    def blocks(self, uint64_t value):
+        if value < 2 or value > SEEDHASH_EPOCH_BLOCKS or (not is_power_of_2(value)):
+            self._blocks = SEEDHASH_EPOCH_BLOCKS
+        elif value:
+            self._lag = value
+        else:
+            self._lag = SEEDHASH_EPOCH_BLOCKS
+
+    cpdef uint64_t get_current(self, const uint64_t height):
+        return rx_seedhight(height, self._blocks, self._lag)
+
+    cpdef SeedHeights get_pair(self, const uint64_t height):
+        return SeedHeights(self.get_current(height), height + self._lag)
+
+
+ 

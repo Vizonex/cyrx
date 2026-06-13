@@ -1,5 +1,6 @@
-from cyrx import Cache, VM, get_flags, RXMiner
 from binascii import hexlify
+
+from cyrx import VM, Cache, RXMiner, get_flags
 
 
 def test_example() -> None:

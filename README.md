@@ -1,4 +1,7 @@
 # cyrx
+[![PyPI version](https://badge.fury.io/py/cyrx.svg)](https://badge.fury.io/py/cyrx)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/cyrx)](https://badge.fury.io/py/cyrx)
+
 A Sequal to pyrx the randomX crypto mining library.
 This one plans to actually have a pypi package associated to it.
 It shares the resemblance of the actual randomx api rather 
