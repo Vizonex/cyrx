@@ -23,6 +23,8 @@ requires = [
     "cython"
 ]
 
+[project.urls]
+    repository = "https://github.com/Vizonex/cyrx.git"
 
 [tool.setuptools.dynamic]
 version = {attr = "cyrx.__version__"}
