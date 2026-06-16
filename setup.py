@@ -71,6 +71,12 @@ class cyrx_build_ext(build_ext):
         ]
 
         if is_windows_11_arm():
+            # Swap to clang compiler or mingw if avalible...
+            # SEE: https://github.com/tevador/RandomX/issues/311#issuecomment-3800959279
+            # Please throw me an issue on github if you experience any problems with this...
+            # or do not have clang there isn't much I can do.
+            cmake_args.append("-DCMAKE_C_COMPILER=clang")
+            cmake_args.append("-DCMAKE_CXX_COMPILER=clang++")
             cmake_args.append("-DARM64")
         
         print(f"Configuring randomx with CMake in {build_temp}")
