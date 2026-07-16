@@ -34,7 +34,6 @@ tests = ["pytest"]
 
 [tool.cibuildwheel]
 build-frontend = "build"
-enable = ["cpython-freethreading"]
 
 [tool.ruff.lint]
 select = ["E", "I", "UP", "ASYNC", "F", "RUF"]
