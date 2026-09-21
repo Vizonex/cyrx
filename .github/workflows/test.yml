@@ -15,11 +15,11 @@ jobs:
       matrix:
         # NOTE windows-11-arm is currently unsupported but I'm sure
         # someone will have the courage to step in and help fix it...
-        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
+        os: [ubuntu-latest, windows-latest, windows-11-arm, macos-14, macos-latest]
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.14t']
-        # exclude:
-          # - os: windows-11-arm  # setup-python action only supports 3.11+
-            # python-version: '3.10'
+        exclude:
+          - os: windows-11-arm  # setup-python action only supports 3.11+
+            python-version: '3.10'
     steps:
     - uses: actions/checkout@v7
       with:
